@@ -49,15 +49,48 @@ export const createCourse = async (req, res) => {
  *     parameters:
  *       - in: query
  *         name: page
- *         schema: { type: integer, default: 1 }
+ *         schema:
+ *           type: integer
+ *           default: 1
  *         description: Page number
  *       - in: query
  *         name: limit
- *         schema: { type: integer, default: 10 }
+ *         schema:
+ *           type: integer
+ *           default: 10
  *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: asc
+ *         description: Sort order by course ID
+ *       - in: query
+ *         name: populate
+ *         schema:
+ *           type: string
+ *         description: Comma-separated related models to include (e.g., 'Teacher')
  *     responses:
  *       200:
  *         description: List of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     totalItems:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
  */
 export const getAllCourses = async (req, res) => {
 
@@ -66,13 +99,24 @@ export const getAllCourses = async (req, res) => {
     // which page to take
     const page = parseInt(req.query.page) || 1;
 
+    //sort order
+    const sort = req.query.sort === 'desc' ? 'DESC' : 'ASC';
+const populate = req.query.populate ? req.query.populate.toLowerCase() : '';
+
     const total = await db.Course.count();
 
     try {
         const courses = await db.Course.findAll(
             {
                 // include: [db.Student, db.Teacher],
-                limit: limit, offset: (page - 1) * limit
+                limit: limit, 
+                offset: (page - 1) * limit,
+                order: [['id', sort]],
+                include: populate ? populate.split(',').map(model => {
+                    if (model === 'teacher') return { model: db.Teacher };
+                    if (model === 'student') return { model: db.Student };
+                    return null;
+                }).filter(Boolean) : []
             }
         );
         res.json({

@@ -7,6 +7,28 @@ import db from '../models/index.js';
  *   description: Student management
  */
 
+/**
+ * @swagger
+ * /Students:
+ *   post:
+ *     summary: Create a new student
+ *     tags: [Students]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, department]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Student created
+ */
 export const createStudent = async (req, res) => {
     try {
         const student = await db.Student.create(req.body);
