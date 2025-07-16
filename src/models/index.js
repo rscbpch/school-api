@@ -26,6 +26,6 @@ db.Course.belongsTo(db.Teacher);
 db.Course.belongsToMany(db.Student, { through: "CourseStudent" });
 db.Student.belongsToMany(db.Course, { through: "CourseStudent" });
 
-await sequelize.sync({ alter: true }); // dev only
+// await sequelize.sync({ alter: true }); // dev only
 
 export default db;
